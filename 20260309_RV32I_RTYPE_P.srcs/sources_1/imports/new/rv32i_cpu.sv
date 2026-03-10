@@ -7,6 +7,7 @@ module rv32i_cpu(
     input logic [31:0] instr_data,
     input logic [31:0] drdata,
     output logic [31:0] instr_addr,
+    output  [2:0]            o_funct3,
     output              dwe,
     output [31:0]       daddr,
     output [31:0]       dwdata
@@ -25,6 +26,7 @@ module rv32i_cpu(
     .rf_we(rf_we),
     .rfwd_src(rfwd_src),
     .alu_control(alu_control),
+    .o_funct3(o_funct3),
     .dwe(dwe)
 );
 
@@ -44,6 +46,7 @@ module control_unit(
     output logic       rf_we,
     output logic [3:0] alu_control,
     output logic       rfwd_src,
+    output logic [2:0] o_funct3,
     output logic       dwe
 );
 
@@ -53,27 +56,43 @@ module control_unit(
         alu_control = 4'b0000;
         alu_src     = 1'b0;
         rfwd_src      =1'b0;
+        o_funct3        =3'b000;
         dwe         = 1'b0;
         case (opcode)
             `R_TYPE: begin
                 rf_we=1'b1;
                 alu_src = 1'b0;
-                rfwd_src      =1'b0;
                 alu_control = {funct7[5],funct3};    
+                rfwd_src      =1'b0;
+                o_funct3        =3'b000;
                 dwe         = 1'b0;
             end  
             `S_TYPE:begin
                 rf_we = 1'b0;
                 alu_src = 1'b1;
-                rfwd_src      =1'b0;
                 alu_control = 4'b0000;
+                rfwd_src      =1'b0;
+                o_funct3    = funct3;
                 dwe         = 1'b1;
             end
             `IL_TYPE:begin
                 rf_we = 1'b1;
                 alu_src = 1'b1;
-                rfwd_src      =1'b1;
                 alu_control = 4'b0000;
+                rfwd_src      =1'b1;
+                o_funct3    = funct3;
+                dwe         = 1'b0;
+            end
+            `I_TYPE:begin
+                rf_we = 1'b1;
+                alu_src = 1'b1;
+                if(funct3 == 3'b101)
+                    alu_control = {funct7[5],funct3};
+                else
+                    alu_control = {1'b0,funct3};
+
+                rfwd_src      =1'b0;
+                o_funct3    = funct3;
                 dwe         = 1'b0;
             end
         endcase

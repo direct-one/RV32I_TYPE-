@@ -8,6 +8,7 @@ module rv32i_top(
 
 
     logic dwe;
+    logic [2:0] o_funct3;
     logic [31:0] instr_addr, instr_data, daddr, dwdata,drdata;
     logic [3:0] alu_control;
 
@@ -16,11 +17,13 @@ module rv32i_top(
     );
 
     rv32i_cpu U_RV32I_CPU(
-    .*
+    .*,
+    .o_funct3(o_funct3)
     );
 
     data_mem U_DATA_MEM(
-        .*
+        .*, 
+        .i_funct3(o_funct3)
     );
 
 //    PC U_PC (

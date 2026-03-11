@@ -167,6 +167,15 @@ module imm_extender (
                 `LUI_TYPE, `AUIPC_TYPE:begin
                     imm_data = {instr_data[31:12],12'd0};
                 end 
+                `JAL_TYPE:begin
+                    imm_data = {
+                        {12{instr_data[31]}},
+                        instr_data[20],     //1bit  
+                        instr_data[19:12], // 8bit     
+                        instr_data[10:1], //10bit 
+                        1'b0              //1bit
+                    };
+                end
 
 
             endcase    
